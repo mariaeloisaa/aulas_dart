@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io'; //
 
 List<String> servicos = [
   "Banho e Tosa",
@@ -9,43 +9,52 @@ List<String> servicos = [
 ];
 List<double> precos = [70.50, 120.0, 75.90, 90.50, 130.00];
 
+List<String> carrinho_servicos = [];
+List<double> carrinho_valores = [];
+
 int escolha = 0;
 int indice = 0;
+int opcao_pagamento = 0;
+
 double valor_total = 0;
 double valor_final = 0;
-int opcao_pagamento = 0;
 double juros = 0;
 double juros_porcentagem = 0;
 double desconto_porcentagem = 0;
-String forma_pagamento = "";
 double troco = 0;
 
+String forma_pagamento = "";
+String descricao_promocao = "";
 String nome = "";
 String documento = "";
 
-List<String> carrinho_servicos = [];
-List<double> carrinho_valores = [];
+
 void main(){ 
+
   print("--- BEM-VINDO AO PET SHOP DA ELO --- ");
   print("Para iniciar, insira o seu nome: ");
   nome = stdin.readLineSync()!;
+  nome = capitalizeNome(nome);
+
   while (nome == null || nome.trim().isEmpty){
     print("Existe dado nulo ou vazio, insira novamente seu nome: "); 
-    nome = stdin.readLineSync()!; }
+    nome = capitalizeNome(stdin.readLineSync()!);
+  }
   
   print("Agora insira seu documento: ");
   documento = stdin.readLineSync()!; 
 
   while (documento== null || documento.trim().isEmpty) {
     print("Existe dado nulo ou vazio, insira novamente seu documento: ");
-    documento = stdin.readLineSync()!; }
+    documento = stdin.readLineSync()!;
+  }
     
   menuCliente(); 
   
 }
 
-void menuCliente() {
-  do {
+void menuCliente() { // Função Adicional - Menu
+  do { // Repetição Adicional
     try {
       print("\n--- PET SHOP DA ELO --- ");
       print("Selecione o que deseja: ");
@@ -60,16 +69,18 @@ void menuCliente() {
     } on FormatException {
       print("Digite apenas números.");
       continue;
+    }catch(e){
+      print("Erro $e");
     }
 
     switch (escolha) {
-      case 1:
+      case 1: // Decisões Encadeadas
         print("Serviços");
         listar_servicos();
         break;
 
       case 2:
-        try {
+        try { // Tratamento de Erro Adicional
           print("Qual serviço deseja adicionar?");
           indice = int.parse(stdin.readLineSync()!);
 
@@ -81,11 +92,13 @@ void menuCliente() {
           print("Digite apenas números.");
         } on RangeError {
           print("Serviço inválido.");
+        }catch(e){
+          print("Erro $e");
         }
         break;
 
-      case 3:
-        try {
+      case 3: // Decisões Encadeadas
+        try { // Tratamento de Erro Adicional
           if (carrinho_servicos.isEmpty) {
             print("Seu carrinho está vazio.");
             break;
@@ -95,12 +108,16 @@ void menuCliente() {
           indice = int.parse(stdin.readLineSync()!);
 
           print("${carrinho_servicos[indice - 1]} removido.");
+
           carrinho_servicos.removeAt(indice - 1);
           carrinho_valores.removeAt(indice - 1);
+
         } on FormatException {
           print("Digite apenas números.");
         } on RangeError {
           print("Serviço inválido.");
+        } catch(e){
+          print("Erro $e");
         }
         break;
 
@@ -114,27 +131,32 @@ void menuCliente() {
         break;
 
       case 5:
-        seu_carrinho();
+        
         if (carrinho_servicos.isEmpty) {
           print("Seu carrinho está vazio, adicione itens antes.");
           break;
+        }else{
+          seu_carrinho();
+          promocaoEspecial();
+          formas_pagamento();
         }
 
-        formas_pagamento();
-        do {
-          try {
+        do { // Repetição Adicional
+          try { // Tratamento de Erro Adicional
             opcao_pagamento = int.parse(stdin.readLineSync()!);
           } on FormatException {
             print("Digite apenas números.");
+          }catch(e){
+            print("Erro $e");
           }
           if (opcao_pagamento < 1 || opcao_pagamento > 5) {
-            print("Opção inválida");
+            print("Opção inválida, digite novamente");
           }
         } while (opcao_pagamento < 1 || opcao_pagamento > 5);
 
         valor_final = valor_total;
 
-        switch (opcao_pagamento) {
+        switch (opcao_pagamento) { // Decisões Encadeadas
           case 1:
             valor_final -= (valor_total * 0.1);
             print("Total: R\$${valor_final.toStringAsFixed(2)}");
@@ -181,7 +203,12 @@ void menuCliente() {
             print("Sério? Boleto???!!!??");
             print("Total: R\$${valor_final.toStringAsFixed(2)}");
             break;
+
+          default:
+            print("Opção Inválida");
         }
+
+        promocaoEspecial();
 
         imprimir_recibo();
         escolha = 6;
@@ -228,15 +255,18 @@ void seu_carrinho() {
   }
 }
 
+// Função Adicional - Pagamento
 void formas_pagamento() {
   print("Formas de Pagamento: ");
   print("1. Dinheiro - 10% de desconto");
   print("2. Débito - 10% de desconto");
   print("3. Crédito - 10% de juros");
   print("4. PIX - 15% de desconto");
-  print("5. Boleto -_-");
+  print("5. Boleto -_-"); // Forma de Pagamento Adicional kkk
 }
 
+
+// Função adicional - Recibo
 void imprimir_recibo() {
   print("\n---- RECIBO ----");
   print("Cliente: $nome | $documento");
@@ -247,8 +277,49 @@ void imprimir_recibo() {
   print("--------------------------------");
   print("Subtotal:       R\$${valor_total.toStringAsFixed(2)}");
   print("Descontos:      $desconto_porcentagem%");
+  if (descricao_promocao.isNotEmpty) {
+    print("Promoção:       $descricao_promocao");
+  }
   print("Juros:          $juros_porcentagem%");
   print("Total:          R\$${valor_final.toStringAsFixed(2)}");
   print("Forma de Pagamento: $forma_pagamento");
+  if(troco>0){
+    print("Troco:            $troco");
+  }
   print("---- Obrigado por comprar no PET SHOP DA ELO! ----\n");
 }
+
+
+// Função Adicional
+void promocaoEspecial() {
+  DateTime hoje = DateTime.now(); // Pesquisa
+
+  // Promoção no Dia do Pet (04/08)
+  if (hoje.month == 8 && hoje.day == 4) {
+    print("Promoção Especial do Dia do Pet! 20% de desconto em todas as compras!");
+    valor_final -= (valor_total * 0.20);
+    descricao_promocao = "Dia do Pet - 20% de desconto";
+  }
+
+  // Promoção meu aniversário
+  if (hoje.month == 06 && hoje.day == 10) {
+    print("Promoção do meu aniversário! 25% de desconto em todas as compras!");
+    valor_final -= (valor_total * 0.25);
+    descricao_promocao = "Meu aniversário - 25% de desconto";
+  }
+}
+
+
+// Pesquisa + Função Adicional
+String capitalizeNome(String nome) {
+  return nome
+      .split(' ')
+      .map((palavra) =>
+          palavra.isNotEmpty
+              ? '${palavra[0].toUpperCase()}${palavra.substring(1).toLowerCase()}'
+              : '') 
+      .join(' ');
+}
+
+
+
